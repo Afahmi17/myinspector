@@ -1,0 +1,1450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Inspector Tool Inventory</title>
+<style>
+:root{--bg:#f4f6f9;--card:#fff;--text:#172033;--muted:#6b7280;--line:#e5e7eb;--primary:#2563eb;--primary2:#1d4ed8;--green:#16a34a;--yellow:#d97706;--red:#dc2626}
+*{box-sizing:border-box}body{margin:0;font-family:Segoe UI,Arial,sans-serif;background:var(--bg);color:var(--text)}
+.app{display:flex;min-height:100vh}.sidebar{width:235px;background:#111827;color:white;padding:22px 14px;position:fixed;height:100vh}
+.brand{font-size:19px;font-weight:700;padding:8px 12px 25px}.brand span{display:block;color:#93c5fd;font-size:12px;font-weight:400;margin-top:5px}
+.nav button{width:100%;border:0;background:transparent;color:#d1d5db;text-align:left;padding:12px 13px;border-radius:8px;margin:3px 0;cursor:pointer;font-size:14px}.nav button:hover,.nav button.active{background:#1f2937;color:white}
+.main{margin-left:235px;width:calc(100% - 235px);padding:26px 30px}.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:25px}.top h1{margin:0;font-size:25px}.user{background:white;border:1px solid var(--line);padding:9px 14px;border-radius:20px;font-size:13px}
+.page{display:none}.page.active{display:block}.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:22px}.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px}.label{font-size:12px;color:var(--muted)}.value{font-size:28px;font-weight:700;margin-top:7px}.sub{font-size:12px;color:var(--muted);margin-top:4px}
+.panel{background:white;border:1px solid var(--line);border-radius:12px;padding:20px;margin-bottom:20px}.panel h2{font-size:17px;margin:0 0 16px}.toolbar{display:flex;gap:10px;margin-bottom:15px;flex-wrap:wrap}
+input,select,textarea{border:1px solid #d1d5db;border-radius:7px;padding:10px 11px;font:inherit;background:white}input{min-width:230px}textarea{width:100%;min-height:80px}
+button.primary{background:var(--primary);color:white;border:0;border-radius:7px;padding:10px 16px;cursor:pointer;font-weight:600}button.primary:hover{background:var(--primary2)}
+button.secondary{background:white;color:var(--text);border:1px solid #d1d5db;border-radius:7px;padding:10px 16px;cursor:pointer}
+table{width:100%;border-collapse:collapse;font-size:13px}th,td{padding:12px 10px;border-bottom:1px solid var(--line);text-align:left}th{color:var(--muted);font-weight:600;background:#fafafa}.badge{display:inline-block;padding:4px 8px;border-radius:999px;font-size:11px;font-weight:600}.ok{background:#dcfce7;color:#166534}.warn{background:#fef3c7;color:#92400e}.danger{background:#fee2e2;color:#991b1b}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}.formgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.field label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px}.field.full{grid-column:1/-1}.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);align-items:center;justify-content:center;z-index:10}.modal.show{display:flex}.modalbox{background:white;border-radius:13px;padding:24px;width:min(620px,92vw);max-height:90vh;overflow:auto}.modalhead{display:flex;justify-content:space-between;align-items:center}.close{border:0;background:transparent;font-size:24px;cursor:pointer}.notice{padding:12px;border-radius:8px;background:#eff6ff;color:#1e40af;font-size:13px;margin-bottom:15px}
+@media(max-width:900px){.sidebar{width:70px}.brand{font-size:0}.brand span{display:none}.nav button{font-size:0;text-align:center}.nav button:first-letter{font-size:18px}.main{margin-left:70px;width:calc(100% - 70px)}.cards{grid-template-columns:repeat(2,1fr)}.grid2{grid-template-columns:1fr}}
+@media(max-width:600px){.cards{grid-template-columns:1fr}.formgrid{grid-template-columns:1fr}.main{padding:18px 12px}}
+.searchfield{position:relative}.searchoptions{display:none;position:absolute;left:0;right:0;top:100%;max-height:240px;overflow:auto;background:white;border:1px solid #d1d5db;border-radius:7px;box-shadow:0 8px 20px rgba(0,0,0,.12);z-index:20}.searchoptions.show{display:block}.searchoption{padding:9px 11px;cursor:pointer;font-size:13px;border-bottom:1px solid #f1f1f1}.searchoption:hover{background:#eff6ff}.searchoption:last-child{border-bottom:0}.readonlygrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:10px 0 20px}.readonlyitem{background:#f8fafc;border:1px solid var(--line);border-radius:8px;padding:11px 12px}.readonlyitem .label{font-size:11px;color:var(--muted);text-transform:uppercase;margin-bottom:5px}.readonlyitem .val{font-weight:600}.sectiontitle{font-size:15px;margin:18px 0 10px}.linktool{border:0;background:transparent;color:#2563eb;padding:0;cursor:pointer;font:inherit}.linktool:hover{text-decoration:underline}.excelwrap{overflow:auto;border:1px solid var(--line);border-radius:8px;max-height:58vh}.masstable{min-width:1450px;font-size:12px}.masstable th,.masstable td{padding:7px 6px;vertical-align:top;white-space:nowrap}.masstable thead th{position:sticky;top:0;z-index:2}.masstable input,.masstable select,.masstable textarea{min-width:110px;width:100%;padding:7px 7px;border-radius:5px;font-size:12px}.masstable textarea{min-height:34px;resize:vertical;min-width:160px}.masstable .auto{background:#f8fafc;color:#374151}.masstable .rowno{color:var(--muted);text-align:center}.masstable .delrow{border:0;background:#fee2e2;color:#991b1b;border-radius:5px;padding:6px 8px;cursor:pointer}.masstable td.fillable{position:relative}.fill-handle{position:absolute;right:1px;bottom:1px;width:7px;height:7px;background:#2563eb;border:1px solid #fff;border-radius:1px;cursor:crosshair;z-index:5}.fill-handle:hover{transform:scale(1.25)}.mass-fill-active{outline:2px solid #2563eb;outline-offset:-2px}.retired{background:#e5e7eb;color:#374151}.filterhint{font-size:12px;color:var(--muted);margin:-5px 0 14px}.dashboard-cards{grid-template-columns:repeat(4,1fr)}.pending{background:#dbeafe;color:#1d4ed8}.profilebox{border:1px solid var(--line);border-radius:10px;padding:15px;background:#f8fafc;margin-bottom:15px}.approvalbox{border:1px solid #bfdbfe;background:#eff6ff;border-radius:9px;padding:12px;font-size:13px;margin-top:12px}.statusdot{font-weight:700}.transfer-mode{display:flex;gap:8px;margin-bottom:16px}.transfer-mode button.active{background:#2563eb;color:white;border-color:#2563eb}.retirebox{border:1px solid #fecaca;background:#fff7f7;border-radius:10px;padding:14px;margin-top:12px}.badge.pending{background:#dbeafe;color:#1d4ed8}.badge.warn{background:#fef3c7;color:#92400e}.badge.danger{background:#fee2e2;color:#991b1b}.badge.ok{background:#dcfce7;color:#166534}</style>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+</head>
+<body>
+<div class="app">
+<aside class="sidebar">
+  <div class="brand">🔧 MyInspector<span>Inspector Tool Management</span></div>
+  <div class="nav">
+    <button class="active" onclick="showPage('dashboard',this)">📊 Dashboard</button>
+    <button onclick="showPage('tools',this)">🧰 Tool Register</button>
+    <button onclick="showPage('locations',this)">📍 Locations</button>
+    <button onclick="showPage('inspectors',this)">👷 Inspector Profiles</button>
+    <button onclick="showPage('transfer',this)">↔️ Transfer</button>
+    <button onclick="showPage('history',this)">📜 Transfer History</button>
+  </div>
+</aside>
+
+<main class="main">
+<div class="top"><h1 id="pageTitle">Inventory Dashboard</h1><div class="user">👤 Fahmi</div></div>
+
+<section id="dashboard" class="page active">
+  <div class="cards dashboard-cards">
+    <div class="card"><div class="label">TOTAL TOOLS</div><div class="value" id="totalTools">2,250</div><div class="sub">All registered tools</div></div>
+    <div class="card"><div class="label">ISSUED</div><div class="value" id="issuedTools">1,800</div><div class="sub">Active tools at inspectors</div></div>
+    <div class="card"><div class="label">HQ SPARE</div><div class="value" id="spareTools">450</div><div class="sub">Available spare stock</div></div>
+    <div class="card"><div class="label">RETIRED</div><div class="value" id="retiredTools">0</div><div class="sub">Kept for audit history</div></div>
+    <div class="card"><div class="label">CAL. DUE SOON</div><div class="value" id="dueCalTools">0</div><div class="sub">Next calibration ≤ 30 days</div></div>
+    <div class="card"><div class="label">CAL. OVERDUE</div><div class="value" id="overdueCalTools">0</div><div class="sub">Calibration date passed</div></div>
+    <div class="card"><div class="label">INSPECTORS COMPLETE</div><div class="value" id="completeInspectors">200</div><div class="sub">9 / 9 active tools</div></div>
+    <div class="card" onclick="showPage('history',document.querySelectorAll('.nav button')[4])" style="cursor:pointer"><div class="label">PENDING TRANSFERS</div><div class="value" id="pendingTransfers">0</div><div class="sub">Awaiting approval — click to review</div></div>
+    <div class="card" onclick="showPage('history',document.querySelectorAll('.nav button')[4])" style="cursor:pointer"><div class="label">TOOLS IN TRANSIT</div><div class="value" id="inTransitTools">0</div><div class="sub">Location remains at origin</div></div>
+    <div class="card" onclick="showPage('history',document.querySelectorAll('.nav button')[4])" style="cursor:pointer"><div class="label">AWAITING RECEIPT</div><div class="value" id="awaitingReceiptTools">0</div><div class="sub">Delivered — PIC confirmation required</div></div>
+  </div>
+  <div class="grid2">
+    <div class="panel"><h2>Inventory Overview</h2><table><thead><tr><th>Location</th><th>Type</th><th>Tools</th><th>Status</th></tr></thead><tbody id="dashLocations"></tbody></table></div>
+    <div class="panel"><h2>Recent Activity</h2><table><thead><tr><th>Date</th><th>Tool</th><th>Action</th><th>Status</th></tr></thead><tbody id="dashHistory"></tbody></table></div>
+  </div>
+  <div class="panel" style="margin-bottom:16px"><h2>Movement Tracking</h2><table><thead><tr><th>Tool</th><th>From</th><th>To</th><th>Transport</th><th>Status</th><th>Action</th></tr></thead><tbody id="dashMovements"></tbody></table></div>
+  <div class="grid2">
+    <div class="panel"><h2>Calibration Attention</h2><table><thead><tr><th>Tool</th><th>Category</th><th>Next Calibration</th><th>Status</th></tr></thead><tbody id="dashCalibration"></tbody></table></div>
+    <div class="panel"><h2>Inspector Allocation</h2><table><thead><tr><th>Inspector</th><th>Location</th><th>Tools</th><th>Status</th></tr></thead><tbody id="dashInspectors"></tbody></table></div>
+  </div>
+</section>
+
+<section id="tools" class="page">
+  <div class="panel"><h2>Tool Register</h2>
+  <div class="toolbar">
+    <input id="toolSearch" placeholder="Search Tool ID, category, serial, model..." oninput="renderTools()">
+    <select id="toolCategoryFilter" onchange="renderTools()"><option value="">All categories</option></select>
+    <select id="toolLocFilter" onchange="renderTools()"></select>
+    <select id="toolStatusFilter" onchange="renderTools()">
+      <option value="">All statuses</option><option value="ACTIVE">ACTIVE</option><option value="RETIRED">RETIRED</option>
+    </select>
+    <select id="toolCalFilter" onchange="renderTools()">
+      <option value="">All calibration</option><option value="VALID">VALID</option><option value="DUE SOON">DUE SOON</option><option value="OVERDUE">OVERDUE</option><option value="NOT AVAILABLE">NOT AVAILABLE</option>
+    </select>
+    <button class="secondary" onclick="clearToolFilters()">Clear Filters</button>
+    <button class="primary" onclick="openCreateMode()">＋ ADD NEW TOOL</button>
+  </div>
+  <div class="filterhint">Search across Tool ID, Category, Tool Name, Brand, Model, Serial Number, Location and calibration information.</div>
+  <table><thead><tr><th>Tool ID</th><th>Category</th><th>Tool Name</th><th>Current Location</th><th>Calibration</th><th>Status</th><th>Action</th></tr></thead><tbody id="toolTable"></tbody></table></div>
+</section>
+
+<section id="locations" class="page">
+  <div class="panel"><h2>203 Locations</h2><div class="toolbar"><input id="locSearch" placeholder="Search location..." oninput="renderLocations()"><select id="locType" onchange="renderLocations()"><option value="">All types</option><option>Inspector</option><option>Calibration Lab</option><option>HQ</option></select></div>
+  <table><thead><tr><th>Location ID</th><th>Type</th><th>Assigned To</th><th>Tools</th><th>Status</th></tr></thead><tbody id="locationTable"></tbody></table></div>
+</section>
+
+<section id="inspectors" class="page">
+  <div class="panel">
+    <h2>Inspector Profiles</h2>
+    <div class="toolbar">
+      <input id="inspectorSearch" placeholder="Search Inspector ID or name..." oninput="renderInspectors()">
+      <select id="inspectorStatusFilter" onchange="renderInspectors()">
+        <option value="">All statuses</option>
+        <option value="COMPLETE">Complete 9/9</option>
+        <option value="INCOMPLETE">Incomplete</option>
+      </select>
+    </div>
+    <table>
+      <thead><tr><th>Inspector ID</th><th>Inspector Name</th><th>Location</th><th>Active Tools</th><th>Status</th><th>Action</th></tr></thead>
+      <tbody id="inspectorTable"></tbody>
+    </table>
+  </div>
+</section>
+
+<section id="transfer" class="page">
+  <div class="panel"><h2>Tool Transaction</h2>
+  <div class="notice">Use <b>TRANSFER TOOL</b> for normal movement. Select a <b>Transfer Reason</b> for every transfer. If approval is required, submit it as <b>PENDING</b> and the tool location will not change until approved. Use <b>RETIRE TOOL</b> when a tool is damaged/beyond repair or otherwise permanently removed from service. Retired tools are kept in the system for audit history.</div>
+  <div class="transfer-mode"><button id="transferModeBtn" class="secondary active" onclick="setTransferMode('transfer')">↔️ TRANSFER TOOL</button><button id="retireModeBtn" class="secondary" onclick="setTransferMode('retire')">♻️ RETIRE TOOL</button></div>
+  <div class="transfer-mode" style="margin-top:12px">
+    <button id="singleTransferBtn" class="secondary active" onclick="setBulkTransferMode(false)">↔️ SINGLE TRANSFER</button>
+    <button id="bulkTransferBtn" class="secondary" onclick="setBulkTransferMode(true)">📦 BULK TRANSFER</button>
+  </div>
+
+  <div id="bulkTransferForm" style="display:none">
+    <div class="formgrid">
+      <div class="field full searchfield">
+        <label>To Location *</label>
+        <input id="bulkTo" autocomplete="off" placeholder="Type Location ID or name..." oninput="filterBulkToLocation()" onfocus="showBulkToLocationSuggestions()">
+        <div class="searchoptions" id="bulkToOptions"></div>
+      </div>
+      <div class="field">
+        <label>From Location</label>
+        <select id="bulkFromFilter" onchange="loadBulkTools()">
+          <option value="">All locations</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Tool Search</label>
+        <input id="bulkToolSearch" placeholder="Search Tool ID or Tool Name..." oninput="loadBulkTools()">
+      </div>
+    </div>
+
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin:14px 0">
+      <button class="secondary" type="button" onclick="selectFullToolSet()">✓ SELECT FULL TOOL SET (9)</button>
+      <button class="secondary" type="button" onclick="selectAllBulkTools()">SELECT ALL SHOWN</button>
+      <button class="secondary" type="button" onclick="clearBulkSelection()">CLEAR SELECTION</button>
+      <span class="badge ok" style="padding:10px 13px">Selected: <b id="bulkSelectedCount">0</b></span>
+    </div>
+
+    <div style="overflow:auto;border:1px solid #e2e8f0;border-radius:10px">
+      <table style="min-width:850px">
+        <thead>
+          <tr><th><input type="checkbox" id="bulkMasterCheck" onchange="toggleBulkMaster(this.checked)"></th><th>Tool ID</th><th>Category</th><th>Tool Name</th><th>Current Location</th><th>Status</th></tr>
+        </thead>
+        <tbody id="bulkToolTable"></tbody>
+      </table>
+    </div>
+
+    <div class="formgrid" style="margin-top:14px">
+      <div class="field"><label>PIC</label><input id="bulkPic" value="Fahmi"></div>
+      <div class="field"><label>Transfer Reason *</label><select id="bulkReason"><option value="">Select reason...</option><option>Routine Transfer</option><option>Calibration</option><option>Repair</option><option>Replacement</option><option>New Assignment</option><option>Inspector Change</option><option>Loan</option><option>Other</option></select></div>
+      <div class="field"><label>Transfer Date</label><input id="bulkDate" type="date"></div>
+      <div class="field"><label>Approval Required</label><select id="bulkApproval"><option value="NO">No — direct approval</option><option value="YES">Yes — submit for approval</option></select></div>
+      <div class="field"><label>Transport Method *</label><select id="bulkTransport" onchange="toggleBulkTransportFields()"><option value="Internal">Internal</option><option value="Courier">Courier</option><option value="Lalamove">Lalamove</option></select></div>
+      <div class="field" id="bulkCourierField" style="display:none"><label>Courier</label><select id="bulkCourier"><option>Pos Malaysia</option><option>Ninja Logistics</option><option>SPX Express</option><option>DHL eCommerce</option><option>Other</option></select></div>
+      <div class="field"><label>Tracking / Reference No.</label><input id="bulkTracking" placeholder="e.g. PM123456 / LM789123"></div>
+      <div class="field"><label>Dispatch Date</label><input id="bulkDispatch" type="date"></div>
+      <div class="field"><label>Expected Arrival</label><input id="bulkArrival" type="date"></div>
+      <div class="field full"><label>Remarks</label><textarea id="bulkRemarks" placeholder="Reason / notes..."></textarea></div>
+    </div>
+    <div class="notice" style="margin-top:12px"><b>Bulk movement rule:</b> All selected tools must be active and from the same current location. For Courier/Lalamove, tools remain at the current confirmed location until the receiving PIC clicks <b>RECEIVE</b>.</div>
+    <br><button class="primary" type="button" onclick="makeBulkTransfer()">CREATE BULK MOVEMENT</button>
+  </div>
+
+  <div id="transferForm">
+    <div class="formgrid">
+      <div class="field searchfield"><label>To Location *</label><input id="transferTo" autocomplete="off" placeholder="Select To Location first..." oninput="filterTransferOptions('to')" onfocus="showTransferOptions('to')"><div class="searchoptions" id="transferToOptions"></div></div>
+      <div class="field searchfield"><label>Tool ID *</label><input id="transferTool" autocomplete="off" placeholder="Select To Location first..." disabled style="background:#f1f5f9;cursor:not-allowed" oninput="filterTransferOptions('tool')" onfocus="showTransferOptions('tool')"><div class="searchoptions" id="transferToolOptions"></div></div>
+      <div class="field searchfield"><label>From Location (Auto-fixed)</label><input id="transferFrom" autocomplete="off" placeholder="Select Tool ID after To Location" readonly style="background:#f1f5f9;cursor:not-allowed"><div class="searchoptions" id="transferFromOptions"></div></div>
+      <div class="field"><label>PIC</label><input id="transferPic" value="Fahmi"></div>
+      <div class="field"><label>Transfer Reason *</label><select id="transferReason"><option value="">Select reason...</option><option>Routine Transfer</option><option>Calibration</option><option>Repair</option><option>Replacement</option><option>New Assignment</option><option>Inspector Change</option><option>Loan</option><option>Other</option></select></div>
+      <div class="field"><label>Transfer Date</label><input id="transferDate" type="date"></div>
+      <div class="field"><label>Approval Required</label><select id="transferApproval"><option value="NO">No — direct approval</option><option value="YES">Yes — submit for approval</option></select></div>
+      <div class="field"><label>Transport Method *</label><select id="transportMethod" onchange="toggleTransportFields()"><option value="Internal">Internal</option><option value="Courier">Courier</option><option value="Lalamove">Lalamove</option></select></div>
+      <div class="field" id="courierField" style="display:none"><label>Courier</label><select id="courierName"><option>Pos Malaysia</option><option>Ninja Logistics</option><option>SPX Express</option><option>DHL eCommerce</option><option>Other</option></select></div>
+      <div class="field"><label>Tracking / Reference No.</label><input id="trackingNo" placeholder="e.g. PM123456 / LM789123"></div>
+      <div class="field"><label>Dispatch Date</label><input id="dispatchDate" type="date"></div>
+      <div class="field"><label>Expected Arrival</label><input id="expectedArrival" type="date"></div>
+      <div class="field full"><label>Remarks</label><textarea id="transferRemarks" placeholder="Reason / notes..."></textarea></div>
+    </div>
+    <div class="notice" style="margin-top:12px"><b>Movement rule:</b> For Courier/Lalamove, the tool stays at the current confirmed location while travelling. After delivery, the receiving PIC must click <b>RECEIVE</b> before the Tool Register location changes.</div>
+    <br><button class="primary" onclick="makeTransfer()">CREATE MOVEMENT</button>
+  </div>
+  <div id="retireForm" style="display:none">
+    <div class="retirebox"><b>Retire Tool</b><div style="font-size:13px;color:#6b7280;margin-top:5px">The Tool ID will remain in the register, but its status becomes <b>RETIRED</b> and it cannot be transferred again.</div></div>
+    <div class="formgrid" style="margin-top:14px">
+      <div class="field searchfield"><label>Tool ID *</label><input id="retireTool" autocomplete="off" placeholder="Type Tool ID..." oninput="filterRetireOptions()" onfocus="showRetireOptions()"><div class="searchoptions" id="retireToolOptions"></div></div>
+      <div class="field"><label>Current Location</label><input id="retireFrom" readonly placeholder="Auto from Tool Register"></div>
+      <div class="field"><label>Retire Date *</label><input id="retireDate" type="date"></div>
+      <div class="field"><label>PIC / Action By *</label><input id="retirePic" value="Fahmi"></div>
+      <div class="field full"><label>Reason *</label><select id="retireReason"><option value="">Select reason...</option><option>Damaged / Beyond Repair</option><option>Lost</option><option>Stolen</option><option>Expired / Obsolete</option><option>Other</option></select></div>
+      <div class="field full"><label>Remarks</label><textarea id="retireRemarks" placeholder="Retirement notes..."></textarea></div>
+    </div><br><button class="primary" onclick="retireToolAction()">RETIRE TOOL</button>
+  </div>
+  </div>
+</section>
+
+<section id="history" class="page">
+  <div class="panel">
+    <h2>Transfer History & Movement Tracking</h2>
+    <div class="approvalbox"><b>Pending Transfer Approvals:</b> <span id="pendingApprovalCount">0</span><div id="pendingApprovalList" style="margin-top:8px"></div></div>
+    <div class="toolbar">
+      <select id="histFilterBy" onchange="updateHistoryFilter()"><option value="">Filter By...</option><option value="date">Date</option><option value="tool">Tool ID</option><option value="from">From Location</option><option value="to">To Location</option><option value="pic">PIC</option><option value="status">Movement Status</option><option value="transport">Transport</option><option value="tracking">Tracking / Reference</option></select>
+      <input id="histFilterValue" placeholder="Select filter first..." oninput="renderHistory()" disabled><button class="secondary" onclick="clearHistoryFilter()">Clear Filter</button>
+    </div>
+    <h3 style="margin-top:18px">Active Movements</h3>
+    <table><thead><tr><th>Movement ID</th><th>Tool</th><th>From</th><th>To</th><th>Transport</th><th>Tracking</th><th>Status</th><th>Action</th></tr></thead><tbody id="movementTable"></tbody></table>
+    <h3 style="margin-top:22px">Completed / Historical Transfers</h3>
+    <table><thead><tr><th>Date</th><th>Tool</th><th>Action</th><th>From</th><th>To</th><th>PIC</th><th>Remarks</th></tr></thead><tbody id="historyTable"></tbody></table>
+  </div>
+</section>
+</main>
+</div>
+
+
+
+<div class="modal" id="createModeModal">
+  <div class="modalbox" style="max-width:560px">
+    <div class="modalhead">
+      <h2>Add New Tool</h2>
+      <button class="close" onclick="closeCreateMode()">×</button>
+    </div>
+    <div class="notice">Choose how you want to add the tool.</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:18px">
+      <button class="secondary" style="padding:24px 16px;text-align:left" onclick="openSingleCreate()">
+        <b style="font-size:17px">＋ Single Create</b>
+        <div style="margin-top:7px;color:#64748b;font-weight:400">Create one new tool and enter its complete details.</div>
+      </button>
+      <button class="secondary" style="padding:24px 16px;text-align:left" onclick="openMassCreate()">
+        <b style="font-size:17px">＋ Mass Create</b>
+        <div style="margin-top:7px;color:#64748b;font-weight:400">Create multiple tools at once using the same category and setup.</div>
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="addToolModal">
+  <div class="modalbox">
+    <div class="modalhead">
+      <h2>Add New Tool</h2>
+      <button class="close" onclick="closeAddTool()">×</button>
+    </div>
+    <div class="notice">Enter all required tool and calibration details. New tools are added to the Tool Register immediately.</div>
+    <div class="formgrid">
+      <div class="field">
+        <label>Category *</label>
+        <select id="newToolType" onchange="updateNewToolAutoFill()">
+          <option value="">Select category...</option>
+          <option value="DMT">DMT</option><option value="SR">SR</option><option value="WG">WG</option>
+          <option value="FG">FG</option><option value="DDG">DDG</option><option value="DC">DC</option>
+          <option value="TSG">TSG</option><option value="DLSM">DLSM</option><option value="RGS">RGS</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Tool ID *</label>
+        <input id="newToolId" readonly placeholder="Auto running number">
+      </div>
+      <div class="field full">
+        <label>Tool Name</label>
+        <input id="newToolName" readonly placeholder="Auto from category">
+      </div>
+      <div class="field"><label>Brand *</label><input id="newToolBrand" value="Insize"></div>
+      <div class="field"><label>Model</label><input id="newToolModel"></div>
+      <div class="field"><label>Serial Number</label><input id="newToolSerial"></div>
+      <div class="field">
+        <label>Current Location *</label>
+        <select id="newToolLocation"></select>
+      </div>
+
+      <div class="field full"><div class="sectiontitle">Calibration Details</div></div>
+      <div class="field"><label>Certificate Number</label><input id="newToolCert"></div>
+      <div class="field"><label>Last Calibration Date</label><input id="newToolLastCal" type="date"></div>
+      <div class="field"><label>Next Calibration Date</label><input id="newToolNextCal" type="date"></div>
+      <div class="field"><label>Calibration Status</label><input id="newToolCalStatus" readonly value="NOT AVAILABLE"></div>
+      <div class="field">
+        <label>Calibration Lab Location</label>
+        <select id="newToolLab">
+          <option value="">Not assigned</option>
+          <option value="CAL-LAB-01">CAL-LAB-01</option>
+          <option value="CAL-LAB-02">CAL-LAB-02</option>
+        </select>
+      </div>
+      <div class="field full"><label>Calibration Remarks</label><textarea id="newToolRemarks" placeholder="Calibration notes..."></textarea></div>
+    </div>
+    <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:18px">
+      <button class="secondary" onclick="closeAddTool()">Cancel</button>
+      <button class="primary" onclick="addNewTool()">SAVE NEW TOOL</button>
+    </div>
+  </div>
+</div>
+
+
+<div class="modal" id="massCreateModal">
+  <div class="modalbox" style="width:min(1500px,96vw)">
+    <div class="modalhead">
+      <h2>Mass Create Tools — Excel View</h2>
+      <button class="close" onclick="closeMassCreate()">×</button>
+    </div>
+    <div class="notice">Upload your Excel file here. The system will load all rows into one review page. <b>Nothing is created yet.</b> Check the data first, then press <b>CREATE ALL</b>.</div>
+    <div class="toolbar" style="margin-bottom:10px;align-items:center">
+      <label class="primary" style="display:inline-flex;align-items:center;gap:8px;cursor:pointer;margin:0">📥 UPLOAD EXCEL
+        <input id="massExcelFile" type="file" accept=".xlsx,.xls,.csv" style="display:none" onchange="uploadMassExcel(event)">
+      </label>
+      <button class="secondary" onclick="document.getElementById('massExcelFile').click()">Choose File</button>
+      <button class="secondary" onclick="clearMassUpload()">Clear</button>
+      <span id="massFileName" style="font-size:13px;color:var(--muted)">No file selected</span>
+      <span id="massRowCount" style="font-size:13px;color:var(--muted);align-self:center;margin-left:auto">0 rows</span>
+    </div>
+    <div class="excelwrap" id="massExcelWrap" onpaste="handleMassPaste(event)">
+      <table class="masstable">
+        <thead><tr>
+          <th>#</th><th>Category *</th><th>Tool ID</th><th>Tool Name</th><th>Brand *</th><th>Model</th><th>Serial Number</th><th>Location *</th><th>Cert Number</th><th>Last Cal. Date</th><th>Next Cal. Date</th><th>Cal. Status</th><th>Cal. Lab</th><th>Remarks</th><th></th>
+        </tr></thead>
+        <tbody id="massRows"></tbody>
+      </table>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:14px">
+      <div style="font-size:12px;color:var(--muted)">Excel format: Category, Brand, Model, Serial Number, Location, Cert Number, Last Cal. Date, Next Cal. Date, Cal. Lab, Remarks. Tool ID and Tool Name are generated automatically.</div>
+      <div style="display:flex;gap:10px">
+        <button class="secondary" onclick="closeMassCreate()">Cancel</button>
+        <button class="primary" onclick="massCreateTools()">CREATE ALL</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="toolModal"><div class="modalbox"><div class="modalhead"><h2 id="modalTitle">Tool Details</h2><button class="close" onclick="closeModal()">×</button></div><div id="modalBody"></div></div></div>
+
+<script>
+const TOTAL=2250;
+const types=["DMT","SR","WG","FG","DDG","DC","TSG","DLSM","RGS"];
+let locations=[];
+let tools=[];
+let history=[];
+let toolDetails={};
+let pendingTransfers=[];
+let movements=[];
+function saveMovements(){localStorage.setItem("inventoryMovements_v1",JSON.stringify(movements))}
+function movementStatusClass(st){return st==="RECEIVED"?"ok":st==="IN TRANSIT"||st==="DELIVERED / AWAITING RECEIPT"?"warn":st==="DELAYED"||st==="LOST / CLAIM"?"danger":"pending"}
+function activeMovementForTool(toolId){return movements.find(m=>m.tool===toolId&&!["RECEIVED","CANCELLED","REJECTED"].includes(m.status))}
+function transportLabel(m){return m.transport==="Courier"?`${m.courier||"Courier"}${m.tracking?" · "+m.tracking:""}`:m.transport==="Lalamove"?`Lalamove${m.tracking?" · "+m.tracking:""}`:"Internal"}
+
+function getCalStatusForTool(t){
+  const d=toolDetails[t.id]||{};
+  const next=d.nextCal||"";
+  if(!next) return "NOT AVAILABLE";
+  const today=new Date(); today.setHours(0,0,0,0);
+  const nd=new Date(next); nd.setHours(0,0,0,0);
+  const days=Math.ceil((nd-today)/86400000);
+  return days<0?"OVERDUE":days<=30?"DUE SOON":"VALID";
+}
+function savePending(){
+  localStorage.setItem("inventoryPendingTransfers_v1",JSON.stringify(pendingTransfers));
+}
+function getInspectorRows(){
+  return locations.filter(l=>l.type==="Inspector").map(l=>{
+    const active=tools.filter(t=>t.location===l.id&&(t.status||"ACTIVE")==="ACTIVE");
+    return {id:l.id,name:l.name,location:l.id,qty:active.length,status:active.length===9?"COMPLETE":"INCOMPLETE",tools:active};
+  });
+}
+
+function renderInspectors(){
+  const tbody=document.getElementById("inspectorTable");
+  if(!tbody)return;
+  const q=(document.getElementById("inspectorSearch")?.value||"").toLowerCase().trim();
+  const sf=document.getElementById("inspectorStatusFilter")?.value||"";
+  const rows=getInspectorRows().filter(x=>
+    (!q||x.id.toLowerCase().includes(q)||x.name.toLowerCase().includes(q)) &&
+    (!sf||x.status===sf)
+  );
+  tbody.innerHTML=rows.map(x=>`
+    <tr>
+      <td>${x.id}</td>
+      <td><button class="linktool" onclick="openInspectorProfile('${x.id}')"><b>${x.name}</b></button></td>
+      <td>${x.location}</td>
+      <td>${x.qty}/9</td>
+      <td><span class="badge ${x.status==="COMPLETE"?"ok":"warn"}">${x.status}</span></td>
+      <td><button class="secondary" onclick="openInspectorProfile('${x.id}')">VIEW PROFILE</button></td>
+    </tr>
+  `).join("") || '<tr><td colspan="6">No matching inspectors.</td></tr>';
+}
+
+function openInspectorProfile(id){
+  const x=getInspectorRows().find(i=>i.id===id);
+  if(!x)return;
+  const rows=x.tools.map(t=>{
+    const d=toolDetails[t.id]||{};
+    const cal=getCalStatusForTool(t);
+    const mv=activeMovementForTool(t.id);
+    return `<tr>
+      <td><button class="linktool" onclick="details('${t.id}')"><b>${t.id}</b></button></td>
+      <td>${t.type}</td>
+      <td>${toolNames[t.type]||"—"}</td>
+      <td>${d.serial||"—"}</td>
+      <td><span class="badge ${cal==="OVERDUE"?"danger":cal==="DUE SOON"?"warn":cal==="VALID"?"ok":"retired"}">${cal}</span></td>
+      <td>${mv?`<span class="badge ${movementStatusClass(mv.status)}">${mv.status}</span>`:"—"}</td>
+    </tr>`;
+  }).join("") || '<tr><td colspan="6">No active tools assigned.</td></tr>';
+
+  const modal=document.getElementById("toolModal");
+  document.getElementById("modalTitle").textContent=`Inspector Profile — ${x.id}`;
+  document.getElementById("modalBody").innerHTML=`
+    <div class="grid2" style="margin-bottom:16px">
+      <div class="panel"><div class="label">INSPECTOR</div><h2 style="margin:4px 0">${x.name}</h2><div>${x.id} · ${x.location}</div></div>
+      <div class="panel"><div class="label">TOOL ASSIGNMENT</div><h2 style="margin:4px 0">${x.qty}/9</h2><span class="badge ${x.status==="COMPLETE"?"ok":"warn"}">${x.status}</span></div>
+    </div>
+    <div class="panel">
+      <h3>Assigned Tools</h3>
+      <table>
+        <thead><tr><th>Tool ID</th><th>Category</th><th>Tool Name</th><th>Serial Number</th><th>Calibration</th><th>Movement</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>`;
+  modal.classList.add("show");
+}
+
+function openLocationStock(locationId){
+  const loc=locations.find(x=>x.id===locationId);
+  if(!loc)return;
+
+  const categories=["DMT","SR","WG","FG","DDG","DC","TSG","DLSM","RGS"];
+  const activeTools=tools.filter(t=>t.location===locationId&&(t.status||"ACTIVE")==="ACTIVE");
+  const isHQ=String(loc.type||"").toUpperCase()==="HQ";
+
+  const rows=categories.map(cat=>{
+    const qty=activeTools.filter(t=>(t.type||t.category)===cat).length;
+    const toolName=toolNames[cat]||cat;
+    return `<tr data-category="${cat}">
+      <td><button type="button" class="linktool" onclick="openCategoryTools('${locationId}','${cat}')"><b>${cat}</b></button></td>
+      <td>${toolName}</td>
+      <td><b>${qty}</b></td>
+    </tr>`;
+  }).join("");
+
+  const modal=document.getElementById("toolModal");
+  document.getElementById("modalTitle").textContent=`${loc.id} — Stock Balance`;
+  document.getElementById("modalBody").innerHTML=`
+    <div class="readonlygrid">
+      <div class="readonlyitem"><div class="label">LOCATION ID</div><div class="val">${loc.id}</div></div>
+      <div class="readonlyitem"><div class="label">TYPE</div><div class="val">${loc.type||"-"}</div></div>
+      <div class="readonlyitem"><div class="label">ASSIGNED TO</div><div class="val">${loc.name||"-"}</div></div>
+      <div class="readonlyitem"><div class="label">TOTAL QTY</div><div class="val" id="locationTotalQty">${activeTools.length}</div></div>
+    </div>
+
+    ${isHQ?`
+      <div class="toolbar" style="margin-bottom:14px">
+        <select id="hqCategoryFilter" onchange="filterHQCategory()">
+          <option value="">All Categories</option>
+          ${categories.map(c=>`<option value="${c}">${c}</option>`).join("")}
+        </select>
+        <span class="badge ok" style="padding:9px 12px">Qty: <b id="hqQtyDisplay">${activeTools.length}</b></span>
+      </div>
+    `:""}
+
+    <h3 style="margin:18px 0 10px">Stock Balance by Tool</h3>
+    <table>
+      <thead><tr><th>Category</th><th>Tool Name</th><th>Qty</th></tr></thead>
+      <tbody id="locationStockRows">${rows}</tbody>
+      <tfoot><tr><th colspan="2">Total</th><th>${activeTools.length}</th></tr></tfoot>
+    </table>
+  `;
+  modal.classList.add("show");
+}
+
+function filterHQCategory(){
+  const filter=document.getElementById("hqCategoryFilter");
+  const rows=document.querySelectorAll("#locationStockRows tr[data-category]");
+  let qty=0;
+
+  rows.forEach(row=>{
+    const show=!filter.value||row.dataset.category===filter.value;
+    row.style.display=show?"":"none";
+    if(show)qty+=Number(row.cells[2]?.innerText||0);
+  });
+
+  const total=document.getElementById("locationTotalQty");
+  const display=document.getElementById("hqQtyDisplay");
+  if(total)total.innerText=qty;
+  if(display)display.innerText=qty;
+}
+
+function openCategoryTools(locationId,category){
+  const list=tools.filter(t=>t.location===locationId&&(t.type||t.category)===category&&(t.status||"ACTIVE")==="ACTIVE");
+  const modal=document.getElementById("toolModal");
+  document.getElementById("modalTitle").textContent=`${locationId} — ${category}`;
+  document.getElementById("modalBody").innerHTML=`
+    <div class="notice"><b>Category:</b> ${category} &nbsp;&nbsp; <b>Qty:</b> ${list.length}</div>
+    <table>
+      <thead><tr><th>Tool ID</th><th>Tool Name</th><th>Serial Number</th><th>Status</th></tr></thead>
+      <tbody>
+        ${list.length?list.map(t=>{
+          const d=toolDetails[t.id]||{};
+          return `<tr>
+            <td><button class="linktool" onclick="details('${t.id}')"><b>${t.id}</b></button></td>
+            <td>${toolNames[t.type]||"—"}</td>
+            <td>${d.serial||"—"}</td>
+            <td><span class="badge ok">${t.status||"ACTIVE"}</span></td>
+          </tr>`;
+        }).join(""):`<tr><td colspan="4">No active tools in this category.</td></tr>`}
+      </tbody>
+    </table>
+  `;
+  modal.classList.add("show");
+}
+
+const inspectorNames=["Ahmad Abdullah", "Ahmad Ahmad", "Ahmad Ali", "Ahmad Aziz", "Ahmad Bakri", "Ahmad Hassan", "Ahmad Hashim", "Ahmad Hisham", "Ahmad Ibrahim", "Ahmad Idris", "Aiman Abdullah", "Aiman Ahmad", "Aiman Ali", "Aiman Aziz", "Aiman Bakri", "Aiman Hassan", "Aiman Hashim", "Aiman Hisham", "Aiman Ibrahim", "Aiman Idris", "Afiq Abdullah", "Afiq Ahmad", "Afiq Ali", "Afiq Aziz", "Afiq Bakri", "Afiq Hassan", "Afiq Hashim", "Afiq Hisham", "Afiq Ibrahim", "Afiq Idris", "Akmal Abdullah", "Akmal Ahmad", "Akmal Ali", "Akmal Aziz", "Akmal Bakri", "Akmal Hassan", "Akmal Hashim", "Akmal Hisham", "Akmal Ibrahim", "Akmal Idris", "Amir Abdullah", "Amir Ahmad", "Amir Ali", "Amir Aziz", "Amir Bakri", "Amir Hassan", "Amir Hashim", "Amir Hisham", "Amir Ibrahim", "Amir Idris", "Anas Abdullah", "Anas Ahmad", "Anas Ali", "Anas Aziz", "Anas Bakri", "Anas Hassan", "Anas Hashim", "Anas Hisham", "Anas Ibrahim", "Anas Idris", "Arif Abdullah", "Arif Ahmad", "Arif Ali", "Arif Aziz", "Arif Bakri", "Arif Hassan", "Arif Hashim", "Arif Hisham", "Arif Ibrahim", "Arif Idris", "Ashraf Abdullah", "Ashraf Ahmad", "Ashraf Ali", "Ashraf Aziz", "Ashraf Bakri", "Ashraf Hassan", "Ashraf Hashim", "Ashraf Hisham", "Ashraf Ibrahim", "Ashraf Idris", "Azlan Abdullah", "Azlan Ahmad", "Azlan Ali", "Azlan Aziz", "Azlan Bakri", "Azlan Hassan", "Azlan Hashim", "Azlan Hisham", "Azlan Ibrahim", "Azlan Idris", "Azman Abdullah", "Azman Ahmad", "Azman Ali", "Azman Aziz", "Azman Bakri", "Azman Hassan", "Azman Hashim", "Azman Hisham", "Azman Ibrahim", "Azman Idris", "Danial Abdullah", "Danial Ahmad", "Danial Ali", "Danial Aziz", "Danial Bakri", "Danial Hassan", "Danial Hashim", "Danial Hisham", "Danial Ibrahim", "Danial Idris", "Danish Abdullah", "Danish Ahmad", "Danish Ali", "Danish Aziz", "Danish Bakri", "Danish Hassan", "Danish Hashim", "Danish Hisham", "Danish Ibrahim", "Danish Idris", "Faiz Abdullah", "Faiz Ahmad", "Faiz Ali", "Faiz Aziz", "Faiz Bakri", "Faiz Hassan", "Faiz Hashim", "Faiz Hisham", "Faiz Ibrahim", "Faiz Idris", "Faisal Abdullah", "Faisal Ahmad", "Faisal Ali", "Faisal Aziz", "Faisal Bakri", "Faisal Hassan", "Faisal Hashim", "Faisal Hisham", "Faisal Ibrahim", "Faisal Idris", "Farhan Abdullah", "Farhan Ahmad", "Farhan Ali", "Farhan Aziz", "Farhan Bakri", "Farhan Hassan", "Farhan Hashim", "Farhan Hisham", "Farhan Ibrahim", "Farhan Idris", "Faris Abdullah", "Faris Ahmad", "Faris Ali", "Faris Aziz", "Faris Bakri", "Faris Hassan", "Faris Hashim", "Faris Hisham", "Faris Ibrahim", "Faris Idris", "Fikri Abdullah", "Fikri Ahmad", "Fikri Ali", "Fikri Aziz", "Fikri Bakri", "Fikri Hassan", "Fikri Hashim", "Fikri Hisham", "Fikri Ibrahim", "Fikri Idris", "Firdaus Abdullah", "Firdaus Ahmad", "Firdaus Ali", "Firdaus Aziz", "Firdaus Bakri", "Firdaus Hassan", "Firdaus Hashim", "Firdaus Hisham", "Firdaus Ibrahim", "Firdaus Idris", "Hafiz Abdullah", "Hafiz Ahmad", "Hafiz Ali", "Hafiz Aziz", "Hafiz Bakri", "Hafiz Hassan", "Hafiz Hashim", "Hafiz Hisham", "Hafiz Ibrahim", "Hafiz Idris", "Hakim Abdullah", "Hakim Ahmad", "Hakim Ali", "Hakim Aziz", "Hakim Bakri", "Hakim Hassan", "Hakim Hashim", "Hakim Hisham", "Hakim Ibrahim", "Hakim Idris"];
+function initLocations(){
+  locations=[
+    {id:"HQ-001",type:"HQ",name:"HQ",qty:450,status:"ACTIVE"},
+    {id:"CAL-LAB-01",type:"Calibration Lab",name:"Sendi Mahir",qty:0,status:"ACTIVE"},
+    {id:"CAL-LAB-02",type:"Calibration Lab",name:"Trescal",qty:0,status:"ACTIVE"},
+    {id:"CAL-LAB-03",type:"Calibration Lab",name:"Metcal",qty:0,status:"ACTIVE"}
+  ];
+  for(let i=1;i<=200;i++){
+    locations.push({
+      id:`INS-${String(i).padStart(3,"0")}`,
+      type:"Inspector",
+      name:inspectorNames[i-1],
+      qty:9,
+      status:"ACTIVE"
+    });
+  }
+}
+function seed(){
+  initLocations();
+  tools=[];
+  types.forEach(type=>{
+    for(let i=1;i<=250;i++){
+      const inspectorNo=i<=200 ? i : null;
+      tools.push({
+        id:`${type}-${String(i).padStart(4,"0")}`,
+        type:type,
+        location:inspectorNo ? `INS-${String(inspectorNo).padStart(3,"0")}` : "HQ-001"
+      });
+    }
+  });
+  history=[];
+  toolDetails={};
+  tools.forEach(t=>{toolDetails[t.id]={brand:"Insize"}});
+  save();
+}function save(){localStorage.setItem("inventoryTools_v3",JSON.stringify(tools));localStorage.setItem("inventoryHistory_v3",JSON.stringify(history));localStorage.setItem("inventoryToolDetails_v1",JSON.stringify(toolDetails));savePending();saveMovements()}
+function load(){
+  initLocations();
+  let a=localStorage.getItem("inventoryTools_v3");
+  let h=localStorage.getItem("inventoryHistory_v3");
+  let d=localStorage.getItem("inventoryToolDetails_v1");
+  let p=localStorage.getItem("inventoryPendingTransfers_v1");
+  let m=localStorage.getItem("inventoryMovements_v1");
+  if(a){
+    tools=JSON.parse(a);
+    history=h?JSON.parse(h):[];
+    toolDetails=d?JSON.parse(d):{};
+    pendingTransfers=p?JSON.parse(p):[];
+    movements=m?JSON.parse(m):[];
+    tools.forEach(t=>{if(!toolDetails[t.id])toolDetails[t.id]={brand:"Insize"}});
+    recalc();
+  }else{
+    seed();
+  }
+}
+function recalc(){locations.forEach(l=>l.qty=tools.filter(t=>t.location===l.id&&(t.status||"ACTIVE")==="ACTIVE").length)}
+function showPage(id,btn){
+ document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));document.getElementById(id).classList.add("active");
+ document.querySelectorAll(".nav button").forEach(b=>b.classList.remove("active"));if(btn)btn.classList.add("active");
+ const titles={dashboard:"Inventory Dashboard",tools:"Tool Register",locations:"Locations",inspectors:"Inspector Profiles",transfer:"Transfer Tool",history:"Transfer History"};document.getElementById("pageTitle").textContent=titles[id];
+ renderAll();
+}
+function status(q){return q===9||q>0?"ok":q===0?"warn":"danger"}
+function renderAll(){recalc();renderDash();renderTools();renderLocations();renderInspectors();renderSelects();renderHistory();renderPendingCount();}
+function renderDash(){
+  const active=tools.filter(t=>(t.status||"ACTIVE")==="ACTIVE");
+  document.getElementById("totalTools").textContent=tools.length.toLocaleString();
+  document.getElementById("issuedTools").textContent=active.filter(t=>t.location.startsWith("INS-")).length.toLocaleString();
+  document.getElementById("spareTools").textContent=active.filter(t=>t.location==="HQ-001").length.toLocaleString();
+  document.getElementById("retiredTools").textContent=tools.filter(t=>t.status==="RETIRED").length.toLocaleString();
+  document.getElementById("dueCalTools").textContent=active.filter(t=>getCalStatusForTool(t)==="DUE SOON").length.toLocaleString();
+  document.getElementById("overdueCalTools").textContent=active.filter(t=>getCalStatusForTool(t)==="OVERDUE").length.toLocaleString();
+  const inspectors=getInspectorRows();
+  document.getElementById("completeInspectors").textContent=inspectors.filter(x=>x.status==="COMPLETE").length.toLocaleString();
+  document.getElementById("pendingTransfers").textContent=pendingTransfers.length.toLocaleString();
+
+  document.getElementById("dashLocations").innerHTML=locations.slice(0,10).map(l=>{
+    const qty=tools.filter(t=>t.location===l.id&&(t.status||"ACTIVE")==="ACTIVE").length;
+    return `<tr><td>${l.id}</td><td>${l.type}</td><td>${qty}</td><td><span class="badge ${l.type==="Inspector"?(qty===9?"ok":"warn"):"ok"}">${l.type==="Inspector"?(qty===9?"COMPLETE":"INCOMPLETE"):"ACTIVE"}</span></td></tr>`;
+  }).join("");
+
+  document.getElementById("dashHistory").innerHTML=history.slice(-8).reverse().map(h=>`<tr><td>${h.date}</td><td>${h.tool}</td><td>${h.action||"TRANSFER"}</td><td><span class="badge ${h.action==="RETIRE"?"retired":"ok"}">${h.action==="RETIRE"?"COMPLETED":"COMPLETED"}</span></td></tr>`).join("")||'<tr><td colspan="4">No activity yet.</td></tr>';
+
+  const inTransit=movements.filter(m=>m.status==="IN TRANSIT"),awaiting=movements.filter(m=>m.status==="DELIVERED / AWAITING RECEIPT");
+  document.getElementById("inTransitTools").textContent=inTransit.length.toLocaleString();
+  document.getElementById("awaitingReceiptTools").textContent=awaiting.length.toLocaleString();
+  const dm=document.getElementById("dashMovements");
+  if(dm){const recent=movements.filter(m=>!["RECEIVED","CANCELLED","REJECTED"].includes(m.status)).slice(-8).reverse();dm.innerHTML=recent.map(m=>`<tr><td><b>${m.tool}</b></td><td>${m.from}</td><td>${m.to}</td><td>${transportLabel(m)}</td><td><span class="badge ${movementStatusClass(m.status)}">${m.status}</span></td><td>${m.status==="DELIVERED / AWAITING RECEIPT"?`<button class="primary" onclick="receiveMovement('${m.id}')">RECEIVE</button>`:"—"}</td></tr>`).join("")||'<tr><td colspan="6">No active movements.</td></tr>'}
+  const attention=active.filter(t=>["DUE SOON","OVERDUE"].includes(getCalStatusForTool(t))).sort((a,b)=>(toolDetails[a.id]?.nextCal||"").localeCompare(toolDetails[b.id]?.nextCal||"")).slice(0,8);
+  document.getElementById("dashCalibration").innerHTML=attention.map(t=>`<tr><td><button class="linktool" onclick="details('${t.id}')"><b>${t.id}</b></button></td><td>${t.type}</td><td>${toolDetails[t.id]?.nextCal||"—"}</td><td><span class="badge ${getCalStatusForTool(t)==="OVERDUE"?"danger":"warn"}">${getCalStatusForTool(t)}</span></td></tr>`).join("")||'<tr><td colspan="4">No calibration attention required.</td></tr>';
+
+  document.getElementById("dashInspectors").innerHTML=inspectors.slice(0,8).map(x=>`<tr><td>${x.id}</td><td>${x.name}</td><td>${x.qty}/9</td><td><span class="badge ${x.status==="COMPLETE"?"ok":"warn"}">${x.status}</span></td></tr>`).join("");
+}
+function renderTools(){
+  let q=(document.getElementById("toolSearch")?.value||"").toLowerCase().trim();
+  let cat=document.getElementById("toolCategoryFilter")?.value||"";
+  let loc=document.getElementById("toolLocFilter")?.value||"";
+  let stFilter=document.getElementById("toolStatusFilter")?.value||"";
+  let calFilter=document.getElementById("toolCalFilter")?.value||"";
+  let arr=tools.filter(t=>{
+    const d=toolDetails[t.id]||{};
+    const hay=[t.id,t.type,toolNames[t.type]||"",d.brand||"",d.model||"",d.serial||"",t.location||"",d.cert||"",d.lab||"",getCalStatusForTool(t)].join(" ").toLowerCase();
+    return (!q||hay.includes(q)) &&
+      (!cat||t.type===cat) &&
+      (!loc||t.location===loc) &&
+      (!stFilter||((t.status||"ACTIVE")===stFilter)) &&
+      (!calFilter||getCalStatusForTool(t)===calFilter);
+  }).slice(0,500);
+
+  document.getElementById("toolTable").innerHTML=arr.map(t=>{
+    const st=t.status||"ACTIVE", cal=getCalStatusForTool(t);
+    const calClass=cal==="OVERDUE"?"danger":cal==="DUE SOON"?"warn":cal==="VALID"?"ok":"retired";
+    const mv=activeMovementForTool(t.id),locDisplay=st==="RETIRED"?"—":t.location,mvBadge=mv?`<div style="font-size:11px;margin-top:4px"><span class="badge ${movementStatusClass(mv.status)}">${mv.status}</span></div>`:"";
+    return `<tr>
+      <td><button class="linktool" onclick="details('${t.id}')"><b>${t.id}</b></button></td>
+      <td>${t.type}</td>
+      <td>${toolNames[t.type]||t.type}</td>
+      <td>${locDisplay}${mvBadge}</td>
+      <td><span class="badge ${calClass}">${cal}</span></td>
+      <td><span class="badge ${st==="RETIRED"?"retired":"ok"}">${st}</span></td>
+      <td><button class="secondary" onclick="details('${t.id}')">View</button></td>
+    </tr>`;
+  }).join("")||'<tr><td colspan="7">No matching tools.</td></tr>';
+}
+function clearToolFilters(){
+  ["toolSearch","toolCategoryFilter","toolLocFilter","toolStatusFilter","toolCalFilter"].forEach(id=>{const e=document.getElementById(id);if(e)e.value="";});
+  renderTools();
+}
+
+function renderLocations(){
+  let q=(document.getElementById("locSearch")?.value||"").toLowerCase(), typ=document.getElementById("locType")?.value||"";
+  let arr=locations.filter(l=>(!q||l.id.toLowerCase().includes(q)||l.name.toLowerCase().includes(q))&&(!typ||l.type===typ));
+  document.getElementById("locationTable").innerHTML=arr.map(l=>`
+    <tr>
+      <td><button type="button" class="linktool" onclick="openLocationStock('${l.id}')"><b>${l.name || l.id}</b><div style="font-size:11px;color:#64748b;margin-top:3px">${l.id}</div></button></td>
+      <td>${l.type}</td>
+      <td>${l.name}</td>
+      <td>${l.qty}</td>
+      <td><span class="badge ${l.type==="Inspector"?(l.qty===9?"ok":"warn"):"ok"}">${l.type==="Inspector"?(l.qty===9?"COMPLETE":"INCOMPLETE"):"ACTIVE"}</span></td>
+    </tr>`).join("");
+}
+function renderSelects(){
+  const locOpts=locations.map(l=>`<option value="${l.id}">${l.id} — ${l.name}</option>`).join("");
+  const lf=document.getElementById("toolLocFilter"); if(lf){let old=lf.value;lf.innerHTML='<option value="">All locations</option>'+locOpts;lf.value=old}
+  const cf=document.getElementById("toolCategoryFilter"); if(cf){let old=cf.value;cf.innerHTML='<option value="">All categories</option>'+types.map(x=>`<option value="${x}">${x}</option>`).join("");cf.value=old}
+  let oldTool=document.getElementById("transferTool").value;
+  let current=tools.find(t=>t.id===oldTool)||tools[0];
+  document.getElementById("transferTool").value=current?current.id:""; syncTransferFromLocation();
+  renderTransferOptions("tool", "");
+  renderTransferOptions("from", "");
+  renderTransferOptions("to", "");
+  syncFrom();
+}
+function syncFrom(){
+  let id=document.getElementById("transferTool").value.trim();
+  let t=tools.find(x=>x.id.toLowerCase()===id.toLowerCase());
+  document.getElementById("transferFrom").value=t?t.location:"";
+  renderTransferOptions("from", document.getElementById("transferFrom").value);
+}
+function transferSearchText(type){
+  return document.getElementById(type==="tool"?"transferTool":type==="from"?"transferFrom":"transferTo").value.toLowerCase().trim();
+}
+function renderTransferOptions(type,q){
+  const box=document.getElementById(type==="tool"?"transferToolOptions":type==="from"?"transferFromOptions":"transferToOptions");
+  const query=(q||transferSearchText(type)).toLowerCase().trim();
+  let arr=[];
+
+  if(type==="tool"){
+    const destination=(document.getElementById("transferTo")?.value||"").trim().toLowerCase();
+    if(!destination){
+      box.innerHTML='<div class="searchoption">Please select To Location first</div>';
+      return;
+    }
+    arr=tools
+      .filter(t=>(t.status||"ACTIVE")==="ACTIVE" && String(t.location||"").toLowerCase()!==destination)
+      .map(t=>({value:t.id,label:t.id}));
+  }else{
+    arr=locations.map(l=>({value:l.id,label:`${l.id} — ${l.name}`}));
+  }
+
+  arr=arr.filter(x=>!query||x.label.toLowerCase().includes(query)||x.value.toLowerCase().includes(query)).slice(0,100);
+  box.innerHTML=arr.map(x=>`<div class="searchoption" onmousedown="selectTransferOption('${type}','${x.value}')">${x.label}</div>`).join("")||'<div class="searchoption">No matching result</div>';
+}
+function showTransferOptions(type){
+  renderTransferOptions(type);
+  document.getElementById(type==="tool"?"transferToolOptions":type==="from"?"transferFromOptions":"transferToOptions").classList.add("show");
+}
+function filterTransferOptions(type){
+  if(type==="to"){
+    const tool=document.getElementById("transferTool");
+    const from=document.getElementById("transferFrom");
+    if(tool){
+      tool.value="";
+      tool.disabled=false;
+      tool.placeholder="Select Tool ID...";
+    }
+    if(from)from.value="";
+  }
+  renderTransferOptions(type);
+  document.getElementById(type==="tool"?"transferToolOptions":type==="from"?"transferFromOptions":"transferToOptions").classList.add("show");
+  if(type==="tool") syncFrom();
+}
+function selectTransferOption(type,value){
+  const input=document.getElementById(type==="tool"?"transferTool":type==="from"?"transferFrom":"transferTo");
+  input.value=value;
+  document.getElementById(type==="tool"?"transferToolOptions":type==="from"?"transferFromOptions":"transferToOptions").classList.remove("show");
+
+  if(type==="to"){
+    const tool=document.getElementById("transferTool");
+    const from=document.getElementById("transferFrom");
+    if(tool){
+      tool.disabled=false;
+      tool.style.background="";
+      tool.style.cursor="";
+      tool.placeholder="Select Tool ID...";
+      tool.value="";
+    }
+    if(from)from.value="";
+    setTimeout(()=>document.getElementById("transferTool")?.focus(),50);
+    return;
+  }
+
+  if(type==="tool") syncFrom();
+}
+document.addEventListener("click",e=>{
+  if(!e.target.closest(".searchfield")) document.querySelectorAll(".searchoptions").forEach(x=>x.classList.remove("show"));
+});
+function syncTransferFromLocation(){
+  const id=(document.getElementById("transferTool")?.value||"").trim().toLowerCase();
+  const from=document.getElementById("transferFrom");
+  if(!from) return;
+  const t=tools.find(x=>x.id.toLowerCase()===id);
+  if(t){
+    from.value=t.location;
+    from.title="Fixed from the selected Tool ID's current location";
+  }else{
+    from.value="";
+    from.title="";
+  }
+}
+
+function toggleTransportFields(){
+  const method=document.getElementById("transportMethod")?.value||"Internal",courier=document.getElementById("courierField");
+  if(courier)courier.style.display=method==="Courier"?"block":"none";
+  const tr=document.getElementById("trackingNo");if(tr)tr.placeholder=method==="Lalamove"?"Lalamove booking/reference no.":method==="Courier"?"Courier tracking no.":"Internal reference no.";
+}
+
+let bulkSelectedTools=[];
+
+function setBulkTransferMode(isBulk){
+  document.getElementById("transferForm").style.display=isBulk?"none":"block";
+  document.getElementById("bulkTransferForm").style.display=isBulk?"block":"none";
+  document.getElementById("singleTransferBtn").classList.toggle("active",!isBulk);
+  document.getElementById("bulkTransferBtn").classList.toggle("active",isBulk);
+  if(isBulk) initBulkTransfer();
+}
+
+function initBulkTransfer(){
+  const to=document.getElementById("bulkTo");
+  const from=document.getElementById("bulkFromFilter");
+  if(to){
+    to.value="";
+    document.getElementById("bulkToOptions").classList.remove("show");
+  }
+  if(from){
+    const old=from.value;
+    from.innerHTML='<option value="">All locations</option>'+
+      locations.map(l=>`<option value="${l.id}">${l.id} — ${l.name}</option>`).join("");
+    from.value=old;
+  }
+  loadBulkTools();
+}
+
+
+function bulkToLocationResults(query){
+  const q=(query||"").toLowerCase().trim();
+  return locations.filter(l=>{
+    const hay=[l.id,l.name,l.type].join(" ").toLowerCase();
+    return !q||hay.includes(q);
+  }).slice(0,30);
+}
+
+function showBulkToLocationSuggestions(){
+  renderBulkToLocationSuggestions(document.getElementById("bulkTo")?.value||"");
+}
+
+function filterBulkToLocation(){
+  const input=document.getElementById("bulkTo");
+  if(input){
+    // A changed destination invalidates the previous selection.
+    bulkSelectedTools=[];
+  }
+  renderBulkToLocationSuggestions(input?.value||"");
+  loadBulkTools();
+}
+
+function renderBulkToLocationSuggestions(query){
+  const box=document.getElementById("bulkToOptions");
+  if(!box)return;
+  const arr=bulkToLocationResults(query);
+  box.innerHTML=arr.map(l=>`
+    <div class="searchoption" onmousedown="selectBulkToLocation('${l.id}')">
+      <b>${l.id}</b> — ${l.name||l.type||""}
+    </div>`).join("") || '<div class="searchoption">No matching location</div>';
+  box.classList.add("show");
+}
+
+function selectBulkToLocation(locationId){
+  const loc=locations.find(l=>l.id===locationId);
+  if(!loc)return;
+  document.getElementById("bulkTo").value=loc.id;
+  document.getElementById("bulkToOptions").classList.remove("show");
+  bulkSelectedTools=[];
+  loadBulkTools();
+}
+
+function loadBulkTools(){
+  const to=(document.getElementById("bulkTo")?.value||"").trim().toLowerCase();
+  const from=(document.getElementById("bulkFromFilter")?.value||"").trim();
+  const q=(document.getElementById("bulkToolSearch")?.value||"").toLowerCase().trim();
+  const tbody=document.getElementById("bulkToolTable");
+  if(!tbody)return;
+
+  if(!to){
+    tbody.innerHTML='<tr><td colspan="6" style="text-align:center;padding:20px;color:#64748b">Select To Location first.</td></tr>';
+    updateBulkCount();
+    return;
+  }
+
+  const selected=new Set(bulkSelectedTools);
+  const arr=tools.filter(t=>{
+    const active=(t.status||"ACTIVE")==="ACTIVE";
+    const notAtDest=String(t.location||"").toLowerCase()!==to;
+    const fromOk=!from||t.location===from;
+    const hay=[t.id,t.type,toolNames[t.type]||"",t.location].join(" ").toLowerCase();
+    return active&&notAtDest&&fromOk&&(!q||hay.includes(q));
+  }).slice(0,300);
+
+  tbody.innerHTML=arr.map(t=>`
+    <tr>
+      <td><input type="checkbox" class="bulk-tool-check" value="${t.id}" ${selected.has(t.id)?"checked":""} onchange="toggleBulkTool('${t.id}',this.checked)"></td>
+      <td><button class="linktool" onclick="details('${t.id}')"><b>${t.id}</b></button></td>
+      <td>${t.type}</td>
+      <td>${toolNames[t.type]||t.type}</td>
+      <td>${t.location}</td>
+      <td><span class="badge ok">ACTIVE</span></td>
+    </tr>`).join("")||'<tr><td colspan="6" style="text-align:center;padding:20px">No matching active tools.</td></tr>';
+
+  document.getElementById("bulkMasterCheck").checked=arr.length>0&&arr.every(t=>selected.has(t.id));
+  updateBulkCount();
+}
+
+function toggleBulkTool(id,checked){
+  if(checked){
+    if(!bulkSelectedTools.includes(id))bulkSelectedTools.push(id);
+  }else{
+    bulkSelectedTools=bulkSelectedTools.filter(x=>x!==id);
+  }
+  updateBulkCount();
+}
+
+function toggleBulkMaster(checked){
+  document.querySelectorAll(".bulk-tool-check").forEach(cb=>{
+    cb.checked=checked;
+    toggleBulkTool(cb.value,checked);
+  });
+}
+
+function selectAllBulkTools(){
+  document.querySelectorAll(".bulk-tool-check").forEach(cb=>{
+    cb.checked=true;
+    if(!bulkSelectedTools.includes(cb.value))bulkSelectedTools.push(cb.value);
+  });
+  updateBulkCount();
+}
+
+function selectFullToolSet(){
+  const to=(document.getElementById("bulkTo")?.value||"").trim();
+  if(!to)return alert("Please select To Location first.");
+
+  const dest=locations.find(l=>l.id===to);
+  if(!dest)return alert("Invalid To Location.");
+
+  const categories=["DMT","SR","WG","FG","DDG","DC","TSG","DLSM","RGS"];
+  const candidates=tools.filter(t=>
+    (t.status||"ACTIVE")==="ACTIVE" &&
+    t.location==="HQ-001" &&
+    t.location!==to
+  );
+
+  const chosen=[];
+  categories.forEach(cat=>{
+    const t=candidates.find(x=>(x.type||x.category)===cat && !chosen.includes(x));
+    if(t)chosen.push(t);
+  });
+
+  if(chosen.length<9){
+    return alert(`Only ${chosen.length} complete tool categories are available from HQ-001. Need 9 tools.`);
+  }
+
+  bulkSelectedTools=chosen.map(t=>t.id);
+  loadBulkTools();
+  alert("Full 9-tool set selected: 1 tool from each category.");
+}
+
+function clearBulkSelection(){
+  bulkSelectedTools=[];
+  loadBulkTools();
+}
+
+function updateBulkCount(){
+  const el=document.getElementById("bulkSelectedCount");
+  if(el)el.textContent=bulkSelectedTools.length;
+}
+
+function toggleBulkTransportFields(){
+  const method=document.getElementById("bulkTransport")?.value||"Internal";
+  const courier=document.getElementById("bulkCourierField");
+  if(courier)courier.style.display=method==="Courier"?"block":"none";
+  const tr=document.getElementById("bulkTracking");
+  if(tr)tr.placeholder=method==="Lalamove"?"Lalamove booking/reference no.":method==="Courier"?"Courier tracking no.":"Internal reference no.";
+}
+
+function makeBulkTransfer(){
+  const to=document.getElementById("bulkTo").value.trim();
+  const pic=document.getElementById("bulkPic").value.trim()||"Unknown";
+  const reason=document.getElementById("bulkReason").value;
+  const approval=document.getElementById("bulkApproval").value;
+  const date=document.getElementById("bulkDate").value||new Date().toISOString().slice(0,10);
+  const transport=document.getElementById("bulkTransport").value;
+  const courier=document.getElementById("bulkCourier")?.value||"";
+  const tracking=document.getElementById("bulkTracking").value.trim();
+  const dispatchDate=document.getElementById("bulkDispatch").value||date;
+  const expectedArrival=document.getElementById("bulkArrival").value||"";
+  const remarks=document.getElementById("bulkRemarks").value.trim();
+  const dest=locations.find(x=>x.id===to);
+
+  if(!dest)return alert("Please select a valid To Location.");
+  if(!bulkSelectedTools.length)return alert("Please select at least one tool.");
+  if(!reason)return alert("Please select a Transfer Reason.");
+  if((transport==="Courier"||transport==="Lalamove")&&!tracking)return alert("Please enter the tracking/reference number.");
+
+  const selected=bulkSelectedTools.map(id=>tools.find(t=>t.id===id)).filter(Boolean);
+  if(selected.length!==bulkSelectedTools.length)return alert("One or more selected tools are invalid.");
+  if(selected.some(t=>(t.status||"ACTIVE")!=="ACTIVE"))return alert("Retired tools cannot be transferred.");
+  if(selected.some(t=>activeMovementForTool(t.id)))return alert("One or more selected tools already have an active movement.");
+
+  const from=selected[0].location;
+  if(selected.some(t=>t.location!==from)){
+    return alert("For one bulk shipment, all selected tools must have the same From Location.");
+  }
+  if(from===to)return alert("Selected tools are already at the To Location.");
+
+  const batchId="BT-"+Date.now();
+  const created=[];
+  selected.forEach((t,i)=>{
+    const base={id:"MV-"+Date.now()+"-"+i,date,tool:t.id,from,to,pic,reason,remarks,transport,courier,tracking,dispatchDate,expectedArrival,requestedAt:new Date().toISOString(),batchId};
+    if(approval==="YES"){
+      pendingTransfers.push({...base,status:"PENDING APPROVAL"});
+    }else{
+      const movement={...base,status:transport==="Internal"?"RECEIVED":"IN TRANSIT"};
+      movements.push(movement);
+      if(movement.status==="RECEIVED"){
+        t.location=to;
+        history.push({date,tool:t.id,from,to,pic,remarks,reason,action:"TRANSFER",approvalStatus:"APPROVED",movementId:movement.id,transport,tracking,batchId});
+      }
+    }
+    created.push(t.id);
+  });
+
+  save();renderAll();
+  alert(`${created.length} tools ${approval==="YES"?"submitted for approval":"included in bulk movement"}.\nBatch: ${batchId}\n${from} → ${to}`);
+  bulkSelectedTools=[];
+  loadBulkTools();
+  ["bulkTracking","bulkArrival","bulkRemarks"].forEach(x=>{const e=document.getElementById(x);if(e)e.value=""});
+}
+
+function makeTransfer(){
+  const id=document.getElementById("transferTool").value.trim(),from=document.getElementById("transferFrom").value.trim(),to=document.getElementById("transferTo").value.trim(),pic=document.getElementById("transferPic").value.trim()||"Unknown",reason=document.getElementById("transferReason").value,approval=document.getElementById("transferApproval").value,date=document.getElementById("transferDate").value||new Date().toISOString().slice(0,10),transport=document.getElementById("transportMethod").value,courier=document.getElementById("courierName")?.value||"",tracking=document.getElementById("trackingNo").value.trim(),dispatchDate=document.getElementById("dispatchDate").value||date,expectedArrival=document.getElementById("expectedArrival").value||"",remarks=document.getElementById("transferRemarks").value.trim();
+  const t=tools.find(x=>x.id.toLowerCase()===id.toLowerCase()),dest=locations.find(x=>x.id.toLowerCase()===to.toLowerCase());
+  if(!t||!from||!dest)return alert("Please select a valid Tool ID, From Location and To Location.");
+  if((t.status||"ACTIVE")!=="ACTIVE")return alert("Retired tools cannot be transferred.");
+  if(activeMovementForTool(t.id))return alert(`${t.id} already has an active movement. Receive or resolve it first.`);
+  if(!reason)return alert("Please select a Transfer Reason.");
+  if(t.location!==from)return alert(`From Location salah. ${id} sekarang berada di ${t.location}.`);
+  if(t.location===to)return alert("Tool is already at this location.");
+  if(transport==="Courier"&&!tracking)return alert("Please enter the courier tracking number.");
+  if(transport==="Lalamove"&&!tracking)return alert("Please enter the Lalamove booking/reference number.");
+  const base={id:"MV-"+Date.now(),date,tool:t.id,from,to,pic,reason,remarks,transport,courier,tracking,dispatchDate,expectedArrival,requestedAt:new Date().toISOString()};
+  if(approval==="YES"){
+    pendingTransfers.push({...base,status:"PENDING APPROVAL"});save();renderAll();
+    alert(`${t.id} movement submitted for approval. Tool location remains ${t.location}.`);
+  }else{
+    const movement={...base,status:transport==="Internal"?"RECEIVED":"IN TRANSIT"};movements.push(movement);
+    if(movement.status==="RECEIVED"){t.location=to;history.push({date,tool:t.id,from,to,pic,remarks,reason,action:"TRANSFER",approvalStatus:"APPROVED",movementId:movement.id,transport,tracking});}
+    save();renderAll();
+    alert(movement.status==="RECEIVED"?`${t.id} transferred successfully: ${from} → ${to}`:`${t.id} movement created. Current Location stays ${from} until the receiving PIC confirms RECEIVED.`);
+  }
+  ["transferRemarks","trackingNo","expectedArrival"].forEach(x=>{const e=document.getElementById(x);if(e)e.value=""});
+}
+function markDelivered(movementId){const m=movements.find(x=>x.id===movementId);if(!m||m.status!=="IN TRANSIT")return;m.status="DELIVERED / AWAITING RECEIPT";m.deliveredAt=new Date().toISOString();saveMovements();renderAll()}
+function receiveMovement(movementId){
+  const m=movements.find(x=>x.id===movementId);if(!m)return;
+  if(!["IN TRANSIT","DELIVERED / AWAITING RECEIPT"].includes(m.status))return alert("This movement is not ready to be received.");
+  const t=tools.find(x=>x.id===m.tool);if(!t)return;
+  if(t.location!==m.from)return alert(`Receive blocked: ${m.tool} is currently recorded at ${t.location}.`);
+  t.location=m.to;m.status="RECEIVED";m.receivedAt=new Date().toISOString();
+  history.push({date:new Date().toISOString().slice(0,10),tool:m.tool,from:m.from,to:m.to,pic:m.pic,remarks:m.remarks,reason:m.reason,action:"TRANSFER",approvalStatus:"APPROVED",movementId:m.id,transport:m.transport,tracking:m.tracking});
+  save();renderAll();alert(`${m.tool} received at ${m.to}. Tool Register location has been updated.`);
+}
+function renderHistory(){
+  let by=document.getElementById("histFilterBy")?.value||"",value=(document.getElementById("histFilterValue")?.value||"").trim().toLowerCase();
+  let activeMov=movements.filter(m=>!["RECEIVED","CANCELLED","REJECTED"].includes(m.status));
+  if(by&&value)activeMov=activeMov.filter(m=>String(m[by]??"").toLowerCase().includes(value));
+  const mt=document.getElementById("movementTable");
+  if(mt)mt.innerHTML=activeMov.slice().reverse().map(m=>{const action=m.status==="DELIVERED / AWAITING RECEIPT"?`<button class="primary" onclick="receiveMovement('${m.id}')">RECEIVE</button>`:m.status==="IN TRANSIT"?`<button class="secondary" onclick="markDelivered('${m.id}')">MARK DELIVERED</button>`:"—";return `<tr><td>${m.id}</td><td><b>${m.tool}</b></td><td>${m.from}</td><td>${m.to}</td><td>${m.transport==="Courier"?m.courier:m.transport}</td><td>${m.tracking||"—"}</td><td><span class="badge ${movementStatusClass(m.status)}">${m.status}</span></td><td>${action}</td></tr>`}).join("")||'<tr><td colspan="8">No active movements.</td></tr>';
+  let arr=history.slice().reverse();
+  if(by&&value)arr=arr.filter(h=>by==="status"?String(h.approvalStatus||"").toLowerCase().includes(value):by==="transport"?String(h.transport||"").toLowerCase().includes(value):by==="tracking"?String(h.tracking||"").toLowerCase().includes(value):String(h[by]??"").toLowerCase().includes(value));
+  const ht=document.getElementById("historyTable");
+  if(ht)ht.innerHTML=arr.map(h=>`<tr><td>${h.date}</td><td><b>${h.tool}</b></td><td><span class="badge ${h.action==="RETIRE"?"retired":"ok"}">${h.action||"TRANSFER"}</span></td><td>${h.from}</td><td>${h.to}</td><td>${h.pic}</td><td>${h.reason?`[${h.reason}] `:""}${h.remarks||"-"}</td></tr>`).join("")||'<tr><td colspan="7">No transfer records.</td></tr>';
+  const count=document.getElementById("pendingApprovalCount"),list=document.getElementById("pendingApprovalList");if(count)count.textContent=pendingTransfers.length;
+  if(list)list.innerHTML=pendingTransfers.map(p=>`<div style="background:white;border:1px solid #dbeafe;border-radius:8px;padding:10px;margin-top:7px"><b>${p.tool}</b> — ${p.from} → ${p.to}<span style="float:right;font-size:12px"><b>${p.reason}</b> · ${p.date} · ${p.pic}</span><div style="margin-top:7px;color:#64748b">${p.transport}${p.courier?" · "+p.courier:""}${p.tracking?" · "+p.tracking:""}</div><div style="margin-top:7px;color:#64748b">${p.remarks||"No remarks"}</div><div style="margin-top:9px;display:flex;gap:8px"><button class="primary" onclick="approveTransfer('${p.id}')">APPROVE</button><button class="secondary" onclick="rejectTransfer('${p.id}')">REJECT</button></div></div>`).join("")||'<div style="margin-top:7px;color:#64748b">No pending approvals.</div>';
+}
+function updateHistoryFilter(){const selected=document.getElementById("histFilterBy")?.value||"",input=document.getElementById("histFilterValue");if(!input)return;input.disabled=!selected;input.type=selected==="date"?"date":"text";const ph={tool:"Type Tool ID...",from:"Type From Location...",to:"Type To Location...",pic:"Type PIC...",status:"e.g. IN TRANSIT",transport:"Courier / Lalamove / Internal",tracking:"Type tracking number..."};input.placeholder=selected==="date"?"Select date...":selected?(ph[selected]||"Type to filter..."):"Select filter first...";renderHistory()}
+function clearHistoryFilter(){const by=document.getElementById("histFilterBy"),input=document.getElementById("histFilterValue");if(by)by.value="";if(input){input.value="";input.disabled=true;input.type="text";input.placeholder="Select filter first..."}renderHistory()}
+function approveTransfer(requestId){
+  const i=pendingTransfers.findIndex(p=>p.id===requestId);if(i<0)return;
+  const p=pendingTransfers[i],t=tools.find(x=>x.id===p.tool);if(!t)return alert("Tool not found.");
+  if(t.location!==p.from)return alert(`Approval blocked: ${p.tool} is no longer at ${p.from}.`);
+  const movement={...p,status:p.transport==="Internal"?"RECEIVED":"IN TRANSIT",approvedAt:new Date().toISOString()};
+  movements.push(movement);pendingTransfers.splice(i,1);
+  if(movement.status==="RECEIVED"){t.location=p.to;history.push({date:p.date,tool:p.tool,from:p.from,to:p.to,pic:p.pic,remarks:p.remarks,reason:p.reason,action:"TRANSFER",approvalStatus:"APPROVED",movementId:movement.id,transport:p.transport,tracking:p.tracking});}
+  save();renderAll();alert(`${p.tool} movement approved. Status: ${movement.status}.`);
+}
+function rejectTransfer(requestId){
+  const i=pendingTransfers.findIndex(p=>p.id===requestId); if(i<0) return;
+  const p=pendingTransfers[i];
+  const rejectReason=prompt("Rejection remarks (optional):","Transfer request rejected");
+  history.push({date:p.date,tool:p.tool,from:p.from,to:p.to,pic:p.pic,remarks:rejectReason||"Transfer request rejected",reason:p.reason,action:"TRANSFER REJECTED",approvalStatus:"REJECTED"});
+  pendingTransfers.splice(i,1); save(); renderAll();
+  alert(`${p.tool} transfer request rejected.`);
+}
+
+
+const toolNames={
+  DMT:"Digital Measuring Tape + Laser Distance Meter",
+  SR:"Steel Ruler",
+  WG:"Welding Gauge",
+  FG:"Feeler Gauge",
+  DDG:"Digital Depth Gauge",
+  DC:"Digital Caliper",
+  TSG:"Taper Slot Gauge",
+  DLSM:"Digital Level and Slope Meter",
+  RGS:"Radius Gauge Set"
+};
+
+
+function openCreateMode(){
+  document.getElementById("createModeModal").classList.add("show");
+}
+function closeCreateMode(){
+  document.getElementById("createModeModal").classList.remove("show");
+}
+function openSingleCreate(){
+  closeCreateMode();
+  openAddTool();
+}
+function populateMassLocations(){
+  return locations.map(l=>`<option value="${l.id}">${l.id} — ${l.name}</option>`).join("");
+}
+function uploadMassExcel(event){
+  const file=event.target.files && event.target.files[0];
+  if(!file) return;
+  document.getElementById('massFileName').textContent=file.name;
+  const reader=new FileReader();
+  reader.onload=function(e){
+    try{
+      const wb=XLSX.read(new Uint8Array(e.target.result),{type:'array',cellDates:true});
+      const ws=wb.Sheets[wb.SheetNames[0]];
+      const rows=XLSX.utils.sheet_to_json(ws,{defval:'',raw:false});
+      if(!rows.length){ alert('Excel file has no data rows.'); return; }
+      document.getElementById('massRows').innerHTML='';
+      rows.forEach(r=>addMassRow({
+        type:r.Category||r.category||r.Type||r.type||'',
+        brand:r.Brand||r.brand||'Insize', model:r.Model||r.model||'',
+        serial:r['Serial Number']||r.Serial||r.serial||'',
+        location:r.Location||r['Current Location']||r.location||'',
+        cert:r['Cert Number']||r['Certificate Number']||r.Cert||r.cert||'',
+        lastCal:r['Last Cal. Date']||r['Last Calibration Date']||r.LastCal||r.lastCal||'',
+        nextCal:r['Next Cal. Date']||r['Next Calibration Date']||r.NextCal||r.nextCal||'',
+        lab:r['Cal. Lab']||r['Calibration Lab Location']||r.Lab||r.lab||'',
+        remarks:r.Remarks||r.remarks||''
+      }));
+      updateMassRows();
+    }catch(err){ console.error(err); alert('Unable to read this Excel file. Please check the file format and headers.'); }
+  };
+  reader.readAsArrayBuffer(file);
+}
+function clearMassUpload(){
+  document.getElementById('massRows').innerHTML='';
+  document.getElementById('massFileName').textContent='No file selected';
+  const f=document.getElementById('massExcelFile'); if(f) f.value='';
+  updateMassRows();
+}
+
+function openMassCreate(){
+  closeCreateMode();
+  document.getElementById("massRows").innerHTML="";
+  addMassRows(5);
+  document.getElementById("massCreateModal").classList.add("show");
+}
+function closeMassCreate(){ document.getElementById("massCreateModal").classList.remove("show"); }
+function massCategoryOptions(selected=""){
+  return '<option value="">Select...</option>'+types.map(t=>`<option value="${t}" ${t===selected?'selected':''}>${t}</option>`).join("");
+}
+function massLocationOptions(selected=""){
+  return '<option value="">Select...</option>'+locations.map(l=>`<option value="${l.id}" ${l.id===selected?'selected':''}>${l.id} — ${l.name}</option>`).join("");
+}
+function massLabOptions(selected=""){
+  return `<option value="">Not assigned</option><option value="CAL-LAB-01" ${selected==='CAL-LAB-01'?'selected':''}>CAL-LAB-01</option><option value="CAL-LAB-02" ${selected==='CAL-LAB-02'?'selected':''}>CAL-LAB-02</option>`;
+}
+function getMassRows(){ return [...document.querySelectorAll('#massRows tr')]; }
+function getReservedMassIds(){ return new Set(getMassRows().map(r=>r.querySelector('.mass-id')?.value).filter(Boolean)); }
+function nextMassId(type){
+  if(!type) return "";
+  const used=new Set(tools.filter(t=>t.type===type).map(t=>t.id.toUpperCase()));
+  getReservedMassIds().forEach(id=>{if(id.startsWith(type+"-")) used.add(id.toUpperCase());});
+  let n=1;
+  while(used.has(`${type}-${String(n).padStart(4,'0')}`.toUpperCase())) n++;
+  return `${type}-${String(n).padStart(4,'0')}`;
+}
+function massStatus(next){
+  if(!next) return 'NOT AVAILABLE';
+  const today=new Date(); today.setHours(0,0,0,0);
+  const nd=new Date(next); nd.setHours(0,0,0,0);
+  const days=Math.ceil((nd-today)/86400000);
+  return days<0?'OVERDUE':days<=30?'DUE SOON':'VALID';
+}
+function addMassRow(data={}){
+  const tbody=document.getElementById('massRows');
+  const tr=document.createElement('tr');
+  const type=data.type||data.category||'';
+  const id=type ? nextMassId(type) : '';
+  const status=massStatus(data.nextCal||data.next||'');
+  tr.innerHTML=`
+    <td class="rowno"></td>
+    <td><select class="mass-type" onchange="updateMassRow(this)">${massCategoryOptions(type)}</select></td>
+    <td><input class="mass-id auto" readonly value="${id}"></td>
+    <td><input class="mass-name auto" readonly value="${toolNames[type]||''}"></td>
+    <td><input class="mass-brand" value="${data.brand||'Insize'}"></td>
+    <td><input class="mass-model" value="${data.model||''}"></td>
+    <td><input class="mass-serial" value="${data.serial||''}"></td>
+    <td><select class="mass-location">${massLocationOptions(data.location||'')}</select></td>
+    <td><input class="mass-cert" value="${data.cert||''}"></td>
+    <td><input class="mass-last" type="date" value="${data.lastCal||data.last||''}"></td>
+    <td><input class="mass-next" type="date" value="${data.nextCal||data.next||''}" oninput="updateMassStatusRow(this)"></td>
+    <td><input class="mass-status auto" readonly value="${status}"></td>
+    <td><select class="mass-lab">${massLabOptions(data.lab||'')}</select></td>
+    <td><textarea class="mass-remarks">${data.remarks||''}</textarea></td>
+    <td><button class="delrow" onclick="this.closest('tr').remove(); renumberMassRows()">×</button></td>`;
+  tbody.appendChild(tr);
+  addMassFillHandles(tr);
+  renumberMassRows();
+}
+function addMassRows(n){ for(let i=0;i<n;i++) addMassRow(); }
+
+// Excel-like fill handle: drag the small blue square at the bottom-right of a cell
+// to copy that cell's value down through the selected rows.
+let massFill={active:false,sourceCell:null,sourceRow:null,lastRow:null};
+function addMassFillHandles(tr){
+  const editable=['mass-brand','mass-model','mass-serial','mass-location','mass-cert','mass-last','mass-next','mass-lab','mass-remarks'];
+  editable.forEach(cls=>{
+    const el=tr.querySelector('.'+cls);
+    if(!el) return;
+    const td=el.closest('td');
+    if(!td || td.querySelector('.fill-handle')) return;
+    td.classList.add('fillable');
+    const h=document.createElement('span');
+    h.className='fill-handle';
+    h.title='Drag to fill down like Excel';
+    h.addEventListener('mousedown',ev=>{
+      ev.preventDefault(); ev.stopPropagation();
+      massFill={active:true,sourceCell:el,sourceRow:tr,lastRow:tr};
+      td.classList.add('mass-fill-active');
+    });
+    td.appendChild(h);
+  });
+}
+function massRowsBetween(a,b){
+  const rows=getMassRows(); const ai=rows.indexOf(a), bi=rows.indexOf(b);
+  if(ai<0||bi<0) return [];
+  const lo=Math.min(ai,bi), hi=Math.max(ai,bi);
+  return rows.slice(lo,hi+1);
+}
+function copyMassCellValue(source,target){
+  if(!source||!target) return;
+  if(source.tagName==='SELECT' || source.tagName==='INPUT' || source.tagName==='TEXTAREA') target.value=source.value;
+  if(target.classList.contains('mass-next')) updateMassStatusRow(target);
+}
+function massFillToRow(targetRow){
+  if(!massFill.active||!massFill.sourceCell||!massFill.sourceRow||!targetRow) return;
+  massRowsBetween(massFill.sourceRow,targetRow).forEach(r=>{
+    if(r===massFill.sourceRow) return;
+    const target=r.querySelector('.'+[...massFill.sourceCell.classList].find(c=>c.startsWith('mass-')));
+    if(target) copyMassCellValue(massFill.sourceCell,target);
+  });
+  massFill.lastRow=targetRow;
+}
+function endMassFill(){
+  if(!massFill.active) return;
+  massFill.sourceRow?.querySelectorAll('.mass-fill-active').forEach(x=>x.classList.remove('mass-fill-active'));
+  document.querySelectorAll('.mass-fill-active').forEach(x=>x.classList.remove('mass-fill-active'));
+  massFill={active:false,sourceCell:null,sourceRow:null,lastRow:null};
+}
+document.addEventListener('mousemove',ev=>{
+  if(!massFill.active) return;
+  const rows=getMassRows();
+  const wrap=document.getElementById('massExcelWrap');
+  if(!wrap) return;
+  const rect=wrap.getBoundingClientRect();
+  if(ev.clientY<rect.top||ev.clientY>rect.bottom) return;
+  let target=rows.find(r=>{const rr=r.getBoundingClientRect(); return ev.clientY>=rr.top && ev.clientY<=rr.bottom;});
+  if(target) massFillToRow(target);
+});
+document.addEventListener('mouseup',endMassFill);
+
+function renumberMassRows(){
+  getMassRows().forEach((r,i)=>r.querySelector('.rowno').textContent=i+1);
+  const c=getMassRows().length; document.getElementById('massRowCount').textContent=`${c} row${c===1?'':'s'}`;
+}
+function updateMassRow(sel){
+  const tr=sel.closest('tr'); const type=sel.value;
+  tr.querySelector('.mass-id').value=nextMassId(type);
+  tr.querySelector('.mass-name').value=toolNames[type]||'';
+}
+function updateMassStatusRow(el){ el.closest('tr').querySelector('.mass-status').value=massStatus(el.value); }
+function handleMassPaste(e){
+  const text=(e.clipboardData||window.clipboardData).getData('text');
+  if(!text || (!text.includes('\t') && !text.includes('\n'))) return;
+  const rows=text.replace(/\r/g,'').split('\n').filter(r=>r.length>0).map(r=>r.split('\t'));
+  const active=document.activeElement;
+  let start=active?.closest('tr');
+  if(!start) start=getMassRows()[0];
+  if(!start){ e.preventDefault(); return; }
+  e.preventDefault();
+  let startIndex=getMassRows().indexOf(start);
+  rows.forEach((vals,ri)=>{
+    let tr=getMassRows()[startIndex+ri];
+    if(!tr){ addMassRow(); tr=getMassRows()[startIndex+ri]; }
+    // Support either 10-column data (without ID/name) or 13-column data (with ID/name/status).
+    const thirteen=vals.length>=13;
+    const map=thirteen
+      ? {type:0,id:1,name:2,brand:3,model:4,serial:5,location:6,cert:7,last:8,next:9,status:10,lab:11,remarks:12}
+      : {type:0,brand:1,model:2,serial:3,location:4,cert:5,last:6,next:7,lab:8,remarks:9};
+    if(vals[map.type]!==undefined) tr.querySelector('.mass-type').value=vals[map.type].trim();
+    updateMassRow(tr.querySelector('.mass-type'));
+    const set=(cls,key)=>{ if(map[key]!==undefined && tr.querySelector(cls)) tr.querySelector(cls).value=vals[map[key]].trim(); };
+    set('.mass-brand','brand'); set('.mass-model','model'); set('.mass-serial','serial'); set('.mass-location','location'); set('.mass-cert','cert'); set('.mass-last','last'); set('.mass-next','next'); set('.mass-lab','lab'); set('.mass-remarks','remarks');
+    updateMassStatusRow(tr.querySelector('.mass-next'));
+  });
+  renumberMassRows();
+}
+function massCreateTools(){
+  const rows=getMassRows();
+  const valid=rows.filter(r=>r.querySelector('.mass-type').value || r.querySelector('.mass-model').value || r.querySelector('.mass-serial').value || r.querySelector('.mass-location').value);
+  if(!valid.length){ alert('Please add at least one tool row.'); return; }
+  const existing=new Set(tools.map(t=>t.id.toUpperCase()));
+  const batch=new Set();
+  const created=[];
+  for(const r of valid){
+    const type=r.querySelector('.mass-type').value;
+    const brand=r.querySelector('.mass-brand').value.trim();
+    const location=r.querySelector('.mass-location').value;
+    if(!type||!brand||!location){ alert('Please fill Category, Brand and Location for every used row.'); return; }
+    const id=r.querySelector('.mass-id').value;
+    if(!id || existing.has(id.toUpperCase()) || batch.has(id.toUpperCase())){ alert(`Duplicate or invalid Tool ID: ${id}`); return; }
+    batch.add(id.toUpperCase());
+    const detail={
+      brand, model:r.querySelector('.mass-model').value.trim(), serial:r.querySelector('.mass-serial').value.trim(), cert:r.querySelector('.mass-cert').value.trim(),
+      lastCal:r.querySelector('.mass-last').value, nextCal:r.querySelector('.mass-next').value, calStatus:r.querySelector('.mass-status').value,
+      lab:r.querySelector('.mass-lab').value, remarks:r.querySelector('.mass-remarks').value.trim()
+    };
+    created.push({id,type,location,detail});
+  }
+  created.forEach(x=>{ tools.push({id:x.id,type:x.type,location:x.location}); toolDetails[x.id]=x.detail; });
+  localStorage.setItem('inventoryToolDetails_v1',JSON.stringify(toolDetails));
+  save(); renderAll(); closeMassCreate();
+  alert(`${created.length} tool(s) created successfully.`);
+}
+
+function getNextToolNumber(type){
+  const prefix=type+"-";
+  const nums=tools
+    .filter(t=>t.type===type && t.id.toUpperCase().startsWith(prefix))
+    .map(t=>parseInt(t.id.split("-").pop(),10))
+    .filter(n=>Number.isFinite(n));
+  const next=nums.length ? Math.max(...nums)+1 : 1;
+  return prefix + String(next).padStart(4,"0");
+}
+
+function updateNewToolAutoFill(){
+  const type=document.getElementById("newToolType").value;
+  document.getElementById("newToolId").value=type ? getNextToolNumber(type) : "";
+  document.getElementById("newToolName").value=toolNames[type]||"";
+}
+
+function calcNewToolCalStatus(){
+  const next=document.getElementById("newToolNextCal").value;
+  let status="NOT AVAILABLE";
+  if(next){
+    const today=new Date(); today.setHours(0,0,0,0);
+    const nd=new Date(next); nd.setHours(0,0,0,0);
+    const days=Math.ceil((nd-today)/86400000);
+    status=days<0?"OVERDUE":days<=30?"DUE SOON":"VALID";
+  }
+  document.getElementById("newToolCalStatus").value=status;
+}
+
+function populateNewToolLocations(){
+  const el=document.getElementById("newToolLocation");
+  el.innerHTML='<option value="">Select location...</option>'+
+    locations.map(l=>`<option value="${l.id}">${l.id} — ${l.name}</option>`).join("");
+}
+
+function openAddTool(){
+  populateNewToolLocations();
+  document.getElementById("newToolId").value="";
+  document.getElementById("newToolType").value="";
+  document.getElementById("newToolName").value="";
+  document.getElementById("newToolBrand").value="Insize";
+  document.getElementById("newToolModel").value="";
+  document.getElementById("newToolSerial").value="";
+  document.getElementById("newToolLocation").value="";
+  document.getElementById("newToolCert").value="";
+  document.getElementById("newToolLastCal").value="";
+  document.getElementById("newToolNextCal").value="";
+  document.getElementById("newToolCalStatus").value="NOT AVAILABLE";
+  document.getElementById("newToolLab").value="";
+  document.getElementById("newToolRemarks").value="";
+  document.getElementById("addToolModal").classList.add("show");
+}
+
+function closeAddTool(){
+  document.getElementById("addToolModal").classList.remove("show");
+}
+
+function addNewTool(){
+  const id=document.getElementById("newToolId").value.trim().toUpperCase();
+  const type=document.getElementById("newToolType").value;
+  const brand=document.getElementById("newToolBrand").value.trim();
+  const location=document.getElementById("newToolLocation").value;
+  if(!id||!type||!brand||!location){
+    alert("Please fill in Tool ID, Category, Brand and Current Location.");
+    return;
+  }
+  if(tools.some(t=>t.id.toUpperCase()===id)){
+    alert("Tool ID already exists. Please use a unique Tool ID.");
+    return;
+  }
+  const prefix=type+"-";
+  if(!id.startsWith(prefix) || !/^[A-Z]+-\d{4,}$/.test(id)){
+    alert(`Tool ID must follow the format ${type}-0001 (example: ${type}-0251).`);
+    return;
+  }
+
+  const detail={
+    brand,
+    model:document.getElementById("newToolModel").value.trim(),
+    serial:document.getElementById("newToolSerial").value.trim(),
+    cert:document.getElementById("newToolCert").value.trim(),
+    lastCal:document.getElementById("newToolLastCal").value,
+    nextCal:document.getElementById("newToolNextCal").value,
+    calStatus:document.getElementById("newToolCalStatus").value,
+    lab:document.getElementById("newToolLab").value,
+    remarks:document.getElementById("newToolRemarks").value.trim()
+  };
+
+  tools.push({id,type,location});
+  toolDetails[id]=detail;
+  localStorage.setItem("inventoryToolDetails_v1",JSON.stringify(toolDetails));
+  save();
+  renderAll();
+  closeAddTool();
+  alert(`${id} added successfully.`);
+}
+
+function details(id){
+ let t=tools.find(x=>x.id===id); if(!t) return;
+ const names={DMT:"Digital Measuring Tape + Laser Distance Meter",SR:"Steel Ruler (Economic Type)",WG:"Welding Gauge",FG:"Feeler Gauge (Length 100mm)",DDG:"Digital Depth Gauge (Base 101.5 × 17mm)",DC:"Digital Caliper",TSG:"Taper Slot Gauge",DLSM:"Digital Level and Slope Meter",RGS:"Radius Gauge Set"};
+ const d=toolDetails[id]||{};
+ const next=d.nextCal||""; let calStatus=d.calStatus||"NOT AVAILABLE";
+ if(next){const today=new Date();today.setHours(0,0,0,0);const nd=new Date(next);nd.setHours(0,0,0,0);const days=Math.ceil((nd-today)/86400000);calStatus=days<0?"OVERDUE":days<=30?"DUE SOON":"VALID";}
+ document.getElementById("modalTitle").textContent=t.id+" — Tool Details";
+ document.getElementById("modalBody").innerHTML=`
+ <div class="sectiontitle">Tool Information</div>
+ <div class="readonlygrid">
+  <div class="readonlyitem"><div class="label">Tool ID</div><div class="val">${t.id}</div></div>
+   <div class="readonlyitem"><div class="label">Status</div><div class="val">${t.status||"ACTIVE"}</div></div>
+  <div class="readonlyitem"><div class="label">Category</div><div class="val">${t.type}</div></div>
+  <div class="readonlyitem"><div class="label">Tool Name</div><div class="val">${names[t.type]||t.type}</div></div>
+  <div class="readonlyitem"><div class="label">Current Location</div><div class="val">${(locations.find(l=>l.id===t.location)?.name||t.location||"Not assigned")} <span style="font-size:11px;color:#64748b">(${t.location||"—"})</span></div></div>
+  <div class="readonlyitem"><div class="label">Brand</div><div class="val">${d.brand||"Insize"}</div></div>
+  <div class="readonlyitem"><div class="label">Model</div><div class="val">${d.model||"Not assigned"}</div></div>
+  <div class="readonlyitem"><div class="label">Serial Number</div><div class="val">${d.serial||"Not assigned"}</div></div>
+ </div>
+ <div class="sectiontitle">Calibration Details</div>
+ <div class="readonlygrid">
+  <div class="readonlyitem"><div class="label">Certificate Number</div><div class="val">${d.cert||"Not available"}</div></div>
+  <div class="readonlyitem"><div class="label">Last Calibration Date</div><div class="val">${d.lastCal||"Not available"}</div></div>
+  <div class="readonlyitem"><div class="label">Next Calibration Date</div><div class="val">${d.nextCal||"Not available"}</div></div>
+  <div class="readonlyitem"><div class="label">Calibration Status</div><div class="val">${calStatus}</div></div>
+  <div class="readonlyitem"><div class="label">Calibration Lab Location</div><div class="val">${d.lab||"Not assigned"}</div></div>
+  <div class="readonlyitem"><div class="label">Calibration Remarks</div><div class="val">${d.remarks||"-"}</div></div>
+ </div>`;
+ document.getElementById("toolModal").classList.add("show");
+}
+
+function closeModal(){document.getElementById("toolModal").classList.remove("show")}
+document.getElementById("transferDate").value=new Date().toISOString().slice(0,10);document.getElementById("retireDate").value=new Date().toISOString().slice(0,10);document.getElementById("transferReason").value="";document.getElementById("transferApproval").value="NO";
+document.getElementById("newToolNextCal")?.addEventListener("change",calcNewToolCalStatus);
+load();renderAll();
+
+// Open a specific Tool Details page when the app is opened from a QR code.
+// Example: MyInspector.html?tool=MT-0001
+(function openToolFromUrl(){
+  const params = new URLSearchParams(window.location.search);
+  const toolId = (params.get("tool") || "").trim().toUpperCase();
+  if (!toolId) return;
+
+  setTimeout(() => {
+    const tool = tools.find(t => String(t.id).toUpperCase() === toolId);
+    if (tool) {
+      details(tool.id);
+    } else {
+      alert("Tool ID " + toolId + " tidak dijumpai dalam MyInspector.");
+    }
+  }, 100);
+})();
+</script>
+</body>
+</html>
